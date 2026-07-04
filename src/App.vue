@@ -911,8 +911,40 @@ export default {
         if (stages[m.stage]) stages[m.stage].push(m)
       }
 
-      const sortFn = (a, b) => new Date(a.kickoff) - new Date(b.kickoff) || a.id - b.id
-      Object.keys(stages).forEach(k => stages[k].sort(sortFn))
+      const logicalOrder = {
+        R32: [
+          537415, 537416, 537417, 537418, 537423, 537424, 537425, 537426,
+          537419, 537420, 537421, 537422, 537427, 537428, 537429, 537430
+        ],
+        R16: [
+          537375, 537376, 537377, 537378, 537379, 537380, 537381, 537382
+        ],
+        QF: [
+          537383, 537384, 537385, 537386
+        ],
+        SF: [
+          537387, 537388
+        ],
+        TPO: [
+          537389
+        ],
+        FIN: [
+          537390
+        ]
+      }
+
+      Object.keys(stages).forEach(k => {
+        stages[k].sort((a, b) => {
+          const list = logicalOrder[k]
+          if (list) {
+            const idxA = list.indexOf(Number(a.id))
+            const idxB = list.indexOf(Number(b.id))
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB
+          }
+          return new Date(a.kickoff) - new Date(b.kickoff) || a.id - b.id
+        })
+      })
+
 
       const copyTeam = (team) => {
         if (!team) return { name: 'TBD', tla: '', flag: '🏴', participant: '' }
