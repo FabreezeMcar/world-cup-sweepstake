@@ -5,7 +5,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   server: {
     port: 80,
-    host: true
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'https://api.football-data.org/v4',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        headers: {
+          'X-Auth-Token': '82cfe9858b5243cfbdbe03ad06d0ef25'
+        }
+      }
+    }
   },
   plugins: [
     vue(),

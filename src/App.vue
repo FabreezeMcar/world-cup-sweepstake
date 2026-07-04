@@ -743,8 +743,8 @@
 //  🔑 LIVE API SETUP
 // ══════════════════════════════════════════════════════════════════════════════
 const API_KEY = "82cfe9858b5243cfbdbe03ad06d0ef25";
-const API_URL_MATCHES = "https://api.football-data.org/v4/competitions/WC/matches";
-const API_URL_STANDINGS = "https://api.football-data.org/v4/competitions/WC/standings";
+const API_URL_MATCHES = "/api/competitions/WC/matches";
+const API_URL_STANDINGS = "/api/competitions/WC/standings";
 
 const MIN_FETCH_MS = 60_000  // 1 minute
 
