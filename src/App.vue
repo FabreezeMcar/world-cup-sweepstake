@@ -920,7 +920,7 @@ export default {
           537375, 537376, 537377, 537378, 537379, 537380, 537381, 537382
         ],
         QF: [
-          537383, 537384, 537385, 537386
+          537383, 537385, 537384, 537386
         ],
         SF: [
           537387, 537388
@@ -945,6 +945,31 @@ export default {
         })
       })
 
+      const matchParents = {
+        // R16 (Match 17 to 24)
+        537375: [537415, 537416],
+        537376: [537417, 537418],
+        537377: [537423, 537424],
+        537378: [537425, 537426],
+        537379: [537419, 537420],
+        537380: [537421, 537422],
+        537381: [537427, 537428],
+        537382: [537429, 537430],
+
+        // QF (QF1 to QF4)
+        537383: [537375, 537376],
+        537385: [537377, 537378],
+        537384: [537379, 537380],
+        537386: [537381, 537382],
+
+        // SF (SF1 & SF2)
+        537387: [537383, 537384],
+        537388: [537385, 537386],
+
+        // FIN & TPO
+        537390: [537387, 537388],
+        537389: [537387, 537388]
+      }
 
       const copyTeam = (team) => {
         if (!team) return { name: 'TBD', tla: '', flag: '🏴', participant: '' }
@@ -970,20 +995,33 @@ export default {
         return null
       }
 
-      const resolveSlot = (stageKey, matchIdx, slotKey, sourceMatch1, sourceMatch2, getSourceTeam) => {
-        const currentMatch = stages[stageKey]?.[matchIdx]
-        if (!currentMatch) return { name: 'TBD', tla: '', flag: '🏴', participant: '' }
+      const findMatchById = (id) => {
+        for (const list of Object.values(stages)) {
+          const found = list.find(x => x.id === id)
+          if (found) return found
+        }
+        return null
+      }
 
+      const resolveSlot = (m, slotKey) => {
+        const parents = matchParents[m.id]
+        if (!parents) return { name: 'TBD', tla: '', flag: '🏴', participant: '' }
+
+        const parentId = slotKey === 'team1' ? parents[0] : parents[1]
+        const parentMatch = findMatchById(parentId)
+        if (!parentMatch) return { name: 'TBD', tla: '', flag: '🏴', participant: '' }
+
+        const isTpo = m.stage === 'TPO'
+        const getSourceTeam = isTpo ? getLoser : getWinner
+
+        const winnerKey = getSourceTeam(parentMatch)
         let team = null
-        if (sourceMatch1) {
-          const winnerKey = getSourceTeam(sourceMatch1)
-          if (winnerKey) {
-            team = winnerKey === 'team1' ? sourceMatch1.team1 : sourceMatch1.team2
-          }
+        if (winnerKey) {
+          team = winnerKey === 'team1' ? parentMatch.team1 : parentMatch.team2
         }
 
         if (!team || !team.tla) {
-          const apiTeam = slotKey === 'team1' ? currentMatch.apiHomeTeam : currentMatch.apiAwayTeam
+          const apiTeam = slotKey === 'team1' ? m.apiHomeTeam : m.apiAwayTeam
           if (apiTeam && apiTeam.tla) {
             team = copyTeam(apiTeam)
           }
@@ -1000,36 +1038,36 @@ export default {
 
       // 2. Resolve R16
       stages.R16.forEach((m, idx) => {
-        m.team1 = resolveSlot('R16', idx, 'team1', stages.R32[2 * idx], null, getWinner)
-        m.team2 = resolveSlot('R16', idx, 'team2', stages.R32[2 * idx + 1], null, getWinner)
+        m.team1 = resolveSlot(m, 'team1')
+        m.team2 = resolveSlot(m, 'team2')
         m.label = `Match ${16 + idx + 1}`
       })
 
       // 3. Resolve QF
       stages.QF.forEach((m, idx) => {
-        m.team1 = resolveSlot('QF', idx, 'team1', stages.R16[2 * idx], null, getWinner)
-        m.team2 = resolveSlot('QF', idx, 'team2', stages.R16[2 * idx + 1], null, getWinner)
+        m.team1 = resolveSlot(m, 'team1')
+        m.team2 = resolveSlot(m, 'team2')
         m.label = `QF ${idx + 1}`
       })
 
       // 4. Resolve SF
       stages.SF.forEach((m, idx) => {
-        m.team1 = resolveSlot('SF', idx, 'team1', stages.QF[2 * idx], null, getWinner)
-        m.team2 = resolveSlot('SF', idx, 'team2', stages.QF[2 * idx + 1], null, getWinner)
+        m.team1 = resolveSlot(m, 'team1')
+        m.team2 = resolveSlot(m, 'team2')
         m.label = `Semi-Final ${idx + 1}`
       })
 
       // 5. Resolve TPO (3rd Place Playoff)
       stages.TPO.forEach((m, idx) => {
-        m.team1 = resolveSlot('TPO', idx, 'team1', stages.SF[0], null, getLoser)
-        m.team2 = resolveSlot('TPO', idx, 'team2', stages.SF[1], null, getLoser)
+        m.team1 = resolveSlot(m, 'team1')
+        m.team2 = resolveSlot(m, 'team2')
         m.label = `3rd Place`
       })
 
       // 6. Resolve FIN (The Final)
       stages.FIN.forEach((m, idx) => {
-        m.team1 = resolveSlot('FIN', idx, 'team1', stages.SF[0], null, getWinner)
-        m.team2 = resolveSlot('FIN', idx, 'team2', stages.SF[1], null, getWinner)
+        m.team1 = resolveSlot(m, 'team1')
+        m.team2 = resolveSlot(m, 'team2')
         m.label = `🏆 The Final`
       })
 
