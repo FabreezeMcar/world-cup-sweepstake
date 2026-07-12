@@ -7,10 +7,18 @@ export default defineConfig({
     port: 80,
     host: true,
     proxy: {
-      '/api': {
-        target: 'https://api.football-data.org/v4',
+      '/.netlify/functions/matches': {
+        target: 'https://api.football-data.org/v4/competitions/WC/matches',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: () => '',
+        headers: {
+          'X-Auth-Token': '82cfe9858b5243cfbdbe03ad06d0ef25'
+        }
+      },
+      '/.netlify/functions/standings': {
+        target: 'https://api.football-data.org/v4/competitions/WC/standings',
+        changeOrigin: true,
+        rewrite: () => '',
         headers: {
           'X-Auth-Token': '82cfe9858b5243cfbdbe03ad06d0ef25'
         }

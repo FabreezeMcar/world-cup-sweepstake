@@ -3,14 +3,8 @@
   command = "npm run build"
 
 [[redirects]]
-  from = "/api/*"
-  to = "https://api.football-data.org/v4/:splat"
-  status = 200
-  force = true
-  headers = { X-Auth-Token = "82cfe9858b5243cfbdbe03ad06d0ef25" }
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
 
